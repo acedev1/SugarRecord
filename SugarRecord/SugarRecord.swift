@@ -11,9 +11,6 @@ import CoreData
 
 let srDefaultDatabaseName: String = "sugarRecordDatabase.sqlite"
 let srSugarRecordVersion: String = "v0.0.1 - Alpha"
-var srShouldAutoCreateManagedObjectModel: Bool = true
-var srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
-var srsrShouldDeleteStoreOnModelMismatch: Bool = true
 
 // MARK - SugarRecord Methods
 class SugarRecord {
@@ -216,37 +213,27 @@ extension NSPersistentStoreCoordinator {
         return nil
     }
     
-    class func newCoordinator(automigrating: Bool?) -> (NSPersistentStoreCoordinator?) {
-        return newCoordinator(srDefaultDatabaseName, automigrating: automigrating)
-    }
-    
     // Database Automigration
-    func autoMigrateDatabase (databaseName: String) -> (persistentStore: NSPersistentStore) {
-        return addDatabase(databaseName, withOptions: NSPersistentStoreCoordinator.autoMigrateOptions())
+    func autoMigrateDatabase (databaseName: String) {
+        
     }
     
-    class func autoMigrateOptions() -> ([NSObject: AnyObject]) {
+    class func autoMigrateOptions() -> ([String: String]) {
         var sqliteOptions: [String: String] = [String: String] ()
         sqliteOptions["WAL"] = "journal_mode"
         var options: [String: NSNumber] = [String: NSNumber] ()
         options[NSMigratePersistentStoresAutomaticallyOption] = NSNumber(bool: true)
         options[NSInferMappingModelAutomaticallyOption] = NSNumber(bool: true)
-        options[NSSQLitePragmasOption] = ""
+        //options[NSSQLitePragmasOption] = sqliteOptions
         return sqliteOptions
     }
 
     // Database creation
-    func addDatabase(databaseName: String, withOptions options: [NSObject: AnyObject]?) -> (persistentStore: NSPersistentStore){
+    func addDatabase(databaseName: String, withOptions options: [String: String]?) {
         let url: NSURL = NSPersistentStore.storeUrl(forDatabaseName: databaseName)
-        var error: NSError?
-        createPathIfNecessary(forFilePath: url)
-        let store: NSPersistentStore = addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options, error: &error)
+        var error: NSError
         
-        if store == nil {
-            if srsrShouldDeleteStoreOnModelMismatch {
-                
-            }
-        }
+    
     }
     
     // Create path if necessary 
