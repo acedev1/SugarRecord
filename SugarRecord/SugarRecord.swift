@@ -9,20 +9,19 @@
 import Foundation
 import CoreData
 
-// MARK: Library Constants
 let srDefaultDatabaseName: String = "sugarRecordDatabase.sqlite"
 let srSugarRecordVersion: String = "v0.0.1 - Alpha"
 let srBackgroundQueueName: String = "sugarRecord.backgroundQueue"
 
-// MARK: Options
+// Static variables - RELATED WITH OPTIONS ENABLED/DISABLED
 var srShouldAutoCreateManagedObjectModel: Bool = true
 var srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
 var srsrShouldDeleteStoreOnModelMismatch: Bool = true
 
-// MARK: Dictionary Keys
+// Static variables - DICTIONARY KEYS
 var srContextWorkingNameKey = "srContextWorkingNameKey"
 
-// MARK: KVO Keys
+// Static variables - RELATED WITH KVO KEYS
 var srKVOWillDeleteDatabaseKey: String = "srKVOWillDeleteDatabaseKey"
 var srKVOPSCMismatchCouldNotDeleteStore: String = "srKVOPSCMismatchCouldNotDeleteStore"
 var srKVOPSCMismatchDidDeleteStore: String = "srKVOPSCMismatchDidDeleteStore"
@@ -31,22 +30,10 @@ var srKVOPSCMismatchDidRecreateStore = "srKVOPSCMismatchDidRecreateStore"
 var srKVOPSCMMismatchCouldNotRecreateStore = "srKVOPSCMMismatchCouldNotRecreateStore"
 var srKVOCleanedUpNotification = "srKVOCleanedUpNotification"
 
-// MARK: SugarRecord Logger
-
-/**
- SugarRecordLogger is a logger to show messages coming from the library depending on the selected log level
-
- - logLevelFatal:   Messages related with fatal events
- - logLevelError:   Messages related with error events
- - logLevelWarm:    Messages related with warm events
- - logLevelInfo:    Messages related with information events
- - logLevelVerbose: Messages related with verbose events
- */
+// MARK - SugarRecordLogger
 enum SugarRecordLogger: Int {
     static var currentLevel: SugarRecordLogger = .logLevelInfo
     case logLevelFatal, logLevelError, logLevelWarm, logLevelInfo, logLevelVerbose
-
-    /// Log the given message depending on the curret log level
     func log(let logMessage: String) -> () {
         switch self {
         case .logLevelFatal:
@@ -62,6 +49,7 @@ enum SugarRecordLogger: Int {
                     return
             }
             print("SR-Warm: \(logMessage) \n")
+            
         case .logLevelInfo:
             if SugarRecordLogger.currentLevel == .logLevelFatal ||
                 SugarRecordLogger.currentLevel == .logLevelError ||
@@ -82,44 +70,40 @@ enum SugarRecordLogger: Int {
 }
 
 
-// MARK: SugarRecord Initialization
-
-/**
- *  Main Library class with some useful constants and methods
- */
+// MARK - SugarRecord Methods
 class SugarRecord {
-        struct Static {
+    
+    // Static variables
+    struct Static {
         static var onceToken : dispatch_once_t = 0
         static var instance : SugarRecord? = nil
         static var backgroundQueue : dispatch_queue_t? = nil
     }
     
-    /**
-     Setup the contexts stack (including the persistent store coordinator)
-
-     :param: automigrating Specifies if the old database should be auto migrated
-     :param: databaseName  Database name. If not passed, default one will be used
-     */
+    // Initialize Database
     class func setupCoreDataStack (automigrating: Bool?, databaseName: String?) -> () {
+        // Checking the coordinator doesn't exist
         var psc: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator.defaultPersistentStoreCoordinator()
         if psc != nil {
             return
         }
+        
+        // Initializing persistentStoreCoordinator
         if databaseName != nil {
             psc = NSPersistentStoreCoordinator.newCoordinator(databaseName!, automigrating: automigrating)
         }
         else {
             psc = NSPersistentStoreCoordinator.newCoordinator(self.defaultDatabaseName(), automigrating: automigrating)
         }
+        
+        // Setting as default persistent store coordinator
         NSPersistentStoreCoordinator.setDefaultPersistentStoreCoordinator(psc!)
+        
+        // Initialize stack
         NSManagedObjectContext.initializeContextsStack(psc!)
     }
     
-    /**
-     Returns the background queue for background operations with SugarRecord
-
-     :returns: Background Queue (lazy generated) queue
-     */
+    // Background queue
     class func backgroundQueue() -> (dispatch_queue_t) {
         if Static.backgroundQueue == nil {
             Static.backgroundQueue = dispatch_queue_create(srBackgroundQueueName, 0)
@@ -127,35 +111,22 @@ class SugarRecord {
         return Static.backgroundQueue!
     }
 
-    /**
-     Clean up the stack and notifies it using key srKVOCleanedUpNotification
-     */
+    
+    // CleanUp
     class func cleanUp () -> () {
         self.cleanUpStack()
         NSNotificationCenter.defaultCenter().postNotificationName(srKVOCleanedUpNotification, object: nil)
     }
-
-    /**
-     Clean the entire stack of SugarRecord Core Data components
-     */
     class func cleanUpStack() {
         NSManagedObjectContext.cleanUp()
         NSManagedObjectModel.cleanUp()
         NSPersistentStoreCoordinator.cleanUp()
         NSPersistentStore.cleanUp()
     }
-}
-
-
-// MARK: SugarRecord Information
-
-extension SugarRecord {
-        /**
-     Information about the current stack
-
-     :returns: String with the stack information (Model, Coordinator, Store, ...)
-     */
-    class func currentStack () -> (String?) {
+    
+    
+    // Returns current stack information
+    class func currentStack () -> (stack: String?) {
         var status: String = "SugarRecord stack \n ------- \n"
         status += "Model:       \(NSManagedObjectModel.defaultManagedObjectModel())\n"
         status += "Coordinator:       \(NSPersistentStoreCoordinator.defaultPersistentStoreCoordinator())\n"
@@ -165,21 +136,13 @@ extension SugarRecord {
         return nil
     }
     
-    /**
-     Returns the current version of SugarRecord
-
-     :returns: String with the version value
-     */
-    class func currentVersion() -> (String) {
+    // Returns current SugarRecord version
+    class func currentVersion() -> (version: String) {
         return srSugarRecordVersion
     }
     
-    /**
-     Rerturns the default data base name
-            
-     :returns: String with the default name (ended in .sqlite)
-     */
-    private class func defaultDatabaseName () -> (String){
+    // Returns the default Database name
+    class func defaultDatabaseName () -> (databaseName: String){
         var databaseName: String
         let bundleName: AnyObject? = NSBundle.mainBundle().infoDictionary[kCFBundleNameKey]
         if let name = bundleName as? String {
@@ -189,46 +152,13 @@ extension SugarRecord {
             databaseName = srDefaultDatabaseName
         }
         if !databaseName.hasSuffix("sqlite") {
-            databaseName = databaseName.stringByAppendingPathExtension("sqlite")!
+            databaseName = databaseName.stringByAppendingPathExtension("sqlite")
         }
         return databaseName
     }
     
-}
-
-
-// MARK - SugarRecord Error Handler
-
-extension SugarRecord {
-    /**
-     Handles an error arount the Library
-
-     :param: error NError to be processed
-     */
-    class func handle(error: NSError?) {
-        
-    }
-
-    /**
-     Handles an exception around the library
-
-     :param: exception NSException to be processed
-     */
-    class func handle(exception: NSException?) {
-        
-    }
     
-}
-
-// MARK - SugarRecord Operations
-
-extension SugarRecord {
-    /**
-     Executes a closure block pasing a context as an input paramter to the closure and saving the context changes before deleting it
-
-     :param: background  Indicates if the saving is going to be executed in background
-     :param: savingBlock Closure to be executed. Context passed is a private context
-     */
+    // Threading //
     class func save(inBackground background: Bool, savingBlock: (context: NSManagedObjectContext) -> (), completion: (success: Bool, error: NSError?) -> ()) {
         dispatch_async(SugarRecord.backgroundQueue(), {
             self.save(true, savingBlock: savingBlock, completion: completion)
@@ -236,14 +166,7 @@ extension SugarRecord {
     }
     
 
-    /**
-    Executes a closure block in background pasing a context as an input paramter to the closure and saving the context changes before deleting it
-
-
-     :param: synchronously Bool indicating if the saving is going to be synchronous
-     :param: savingBlock   Closure to be executed. Context passed is a private context
-     */
-    private class func save(synchronously: Bool, savingBlock: (context: NSManagedObjectContext) -> (), completion: (success: Bool, error: NSError?) -> ()) {
+    class func save(synchronously: Bool, savingBlock: (context: NSManagedObjectContext) -> (), completion: (success: Bool, error: NSError?) -> ()) {
         // Generating context
         var privateContext: NSManagedObjectContext = NSManagedObjectContext.newContextWithParentContext(NSManagedObjectContext.rootSavingContext()!)
         
@@ -261,13 +184,13 @@ extension SugarRecord {
             })
         }
     }
-
-    /**
-     Executes a closure operatin in background but without saving the context used in background.
-
-     :param: block Closure that is going to be executed
-     */
+    
     class func background(block: (context: NSManagedObjectContext) -> ()) {
+        self.save(inBackground: true, savingBlock: { (context) -> () in
+            
+        }) { (success, error) -> () in
+            
+        }
         dispatch_async(SugarRecord.backgroundQueue(), {
             var privateContext: NSManagedObjectContext = NSManagedObjectContext.newContextWithParentContext(NSManagedObjectContext.rootSavingContext()!)
             privateContext.performBlockAndWait({ () -> Void in
@@ -277,20 +200,37 @@ extension SugarRecord {
     }
 }
 
+// MARK - Extension SugarRecord + Error Handling
+
+extension SugarRecord {
+    class func handle(error: NSError?) {
+        
+    }
+    class func handle(exception: NSException?) {
+        
+    }
+    
+}
+
 
 // MARK - NSManagedObjectContext Extension
 
 extension NSManagedObjectContext {
+    // Static variables
     struct Static {
         static var rootSavingContext: NSManagedObjectContext? = nil
         static var defaultContext: NSManagedObjectContext? = nil
     }
+    
+    // Root Saving Context Getter
     class func rootSavingContext() -> (NSManagedObjectContext?) {
         return Static.rootSavingContext
     }
+    
+    // Root Saving Context Setter
     class func setRootSavingContext(context: NSManagedObjectContext?) {
         if Static.rootSavingContext != nil  {
-            NSNotificationCenter.defaultCenter().removeObserver(Static.rootSavingContext!)
+            NSNotificationCenter.defaultCenter().removeObserver(Static.rootSavingContext)
         }
         Static.rootSavingContext = context
         if Static.rootSavingContext == nil {
@@ -312,7 +252,7 @@ extension NSManagedObjectContext {
     class func setDefaultContext(context: NSManagedObjectContext?) {
         // Removing observer if existing defaultContext
         if Static.defaultContext != nil  {
-            NSNotificationCenter.defaultCenter().removeObserver(Static.defaultContext!)
+            NSNotificationCenter.defaultCenter().removeObserver(Static.defaultContext)
         }
         Static.defaultContext = context
         if Static.defaultContext == nil {
@@ -376,19 +316,19 @@ extension NSManagedObjectContext {
         return workingName
     }
     func description() -> (String) {
-        let onMainThread: String = (NSThread.mainThread() != nil) ? "Main Thread" : "Background thread"
+        let onMainThread: String = NSThread.mainThread() ? "Main Thread" : "Background thread"
         return "<\(object_getClassName(self)) (\(self)): \(self.workingName()) on \(onMainThread)"
     }
     
     func parentChain () -> (String)
     {
         var familyTree: String = "\n"
-        var currentContext: NSManagedObjectContext! = self
+        var currentContext: NSManagedObjectContext = self
         do {
             familyTree += " - \(currentContext.workingName()) (\(currentContext)) \n"
             familyTree += currentContext == self ? "(*)" : ""
             currentContext = currentContext.parentContext
-        } while (currentContext != nil)
+        } while currentContext != nil
         return familyTree
     }
     
@@ -428,9 +368,11 @@ extension NSManagedObjectContext {
         // If it doesn't have changes there's nothing to do
         if hasChanges {
             SugarRecordLogger.logLevelVerbose.log("No changes in context \(self.workingName()) - Not saving")
-            dispatch_async(dispatch_get_main_queue(), {
+            if completion != nil {
+                dispatch_async(dispatch_get_main_queue(), {
                         completion(success: false, error: nil)
-            })
+                    })
+            }
         }
         
         var saveBlock: () -> () = {
@@ -440,19 +382,22 @@ extension NSManagedObjectContext {
             if error != nil {
                 SugarRecord.handle(error!)
             }
-            if (saveResult && savingParents && self.parentContext != nil) {
+            if saveResult && savingParents && self.parentContext {
                 self.parentContext.save(synchronously, savingParents: savingParents, completion: completion)
             }
             else {
                 if saveResult {
                     SugarRecordLogger.logLevelVerbose.log("Finished saving \(self.description)")
                 }
-                dispatch_async(dispatch_get_main_queue(), {
-                    completion(success: saveResult, error: error)
-                })
+                if completion != nil {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        if completion != nil {
+                            completion(success: saveResult, error: error)
+                        }
+                    })
+                }
             }
         }
-        
         
         // Saving otherwise
         if synchronously {
@@ -484,7 +429,7 @@ extension NSManagedObjectContext {
     }
     
     class func rootContextChanged(notification: NSNotification) {
-        if (NSThread.mainThread() != nil) {
+        if !NSThread.mainThread() {
             dispatch_async(dispatch_get_main_queue(), {
               self.rootContextChanged(notification)
             })
@@ -536,7 +481,7 @@ extension NSManagedObjectModel {
     class func setDefaultManagedObjectModel(objectModel: NSManagedObjectModel) {
         Static.defaultManagedObjectModel = objectModel
     }
-    class func defaultManagedObjectModel() -> (NSManagedObjectModel) {
+    class func defaultManagedObjectModel() -> (defaultManagedObjectModel: NSManagedObjectModel) {
         var currentModel: NSManagedObjectModel? = Static.defaultManagedObjectModel
         if currentModel == nil {
             currentModel = self.mergedModelFromBundles(nil)
@@ -545,16 +490,17 @@ extension NSManagedObjectModel {
         return currentModel!
     }
     
-    class func mergedModelFromMainBundle() -> (NSManagedObjectModel) {
+    class func mergedModelFromMainBundle() -> (managedObjectModel: NSManagedObjectModel) {
         return mergedModelFromBundles(nil)
     }
     
-    class func newModel(modelName: String, var inBundle bundle: NSBundle?) -> (NSManagedObjectModel) {
+    class func newModel(modelName: String, var inBundle bundle: NSBundle?) -> (managedObjectModel: NSManagedObjectModel) {
         if bundle == nil {
             bundle = NSBundle.mainBundle()
         }
-        let path: String = bundle!.pathForResource(modelName.stringByDeletingPathExtension, ofType: modelName.pathExtension)!
-        let modelURL: NSURL = NSURL.fileURLWithPath(path)!
+        assert(modelName.pathExtension == nil, "SR - Invalid managedObjectModel name, did you forget the extension?")
+        let path: String = bundle!.pathForResource(modelName.stringByDeletingPathExtension, ofType: modelName.pathExtension)
+        let modelURL: NSURL = NSURL.fileURLWithPath(path)
         let mom: NSManagedObjectModel = NSManagedObjectModel(contentsOfURL: modelURL)
         return mom
     }
@@ -593,7 +539,7 @@ extension NSPersistentStoreCoordinator {
     }
     
     // Database Automigration
-    func autoMigrateDatabase (databaseName: String) -> (NSPersistentStore) {
+    func autoMigrateDatabase (databaseName: String) -> (persistentStore: NSPersistentStore) {
         return addDatabase(databaseName, withOptions: NSPersistentStoreCoordinator.autoMigrateOptions())
     }
     
@@ -608,17 +554,18 @@ extension NSPersistentStoreCoordinator {
     }
 
     // Database creation
-    func addDatabase(databaseName: String, withOptions options: [NSObject: AnyObject]?) -> (NSPersistentStore){
+    func addDatabase(databaseName: String, withOptions options: [NSObject: AnyObject]?) -> (persistentStore: NSPersistentStore){
         let url: NSURL = NSPersistentStore.storeUrl(forDatabaseName: databaseName)
         var error: NSError?
         createPathIfNecessary(forFilePath: url)
         let store: NSPersistentStore = addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options, error: &error)
-        if srsrShouldDeleteStoreOnModelMismatch {
+        if store == nil {
+            if srsrShouldDeleteStoreOnModelMismatch {
                 let isMigratingError = error?.code == NSPersistentStoreIncompatibleVersionHashError || error?.code == NSMigrationMissingSourceModelError
                 if (error?.domain == NSCocoaErrorDomain as String) && isMigratingError {
                     NSNotificationCenter.defaultCenter().postNotificationName(srKVOWillDeleteDatabaseKey, object: nil)
                     var deleteError: NSError?
-                    let rawURL: String = url.absoluteString!
+                    let rawURL: String = url.absoluteString
                     let shmSidecar: NSURL = NSURL.URLWithString(rawURL.stringByAppendingString("-shm"))
                     let walSidecar: NSURL = NSURL.URLWithString(rawURL.stringByAppendingString("-wal"))
                     NSFileManager.defaultManager().removeItemAtURL(url, error: &deleteError)
@@ -639,20 +586,27 @@ extension NSPersistentStoreCoordinator {
                     NSNotificationCenter.defaultCenter().postNotificationName(srKVOPSCMismatchWillRecreateStore, object: nil)
                     
                     self.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options, error: &error)
-                    SugarRecordLogger.logLevelInfo.log("Did recreate store")
+                    if store != nil {
+                        SugarRecordLogger.logLevelInfo.log("Did recreate store")
                         NSNotificationCenter.defaultCenter().postNotificationName(srKVOPSCMismatchDidRecreateStore, object: nil)
                         error = nil
+                    }
+                    else {
+                        SugarRecordLogger.logLevelError.log("Could not recreate store")
+                        NSNotificationCenter.defaultCenter().postNotificationName(srKVOPSCMismatchCouldNotDeleteStore, object: nil, userInfo: ["Error": error as AnyObject])
+                    }
                 }
             }
+        }
         return store
     }
 
     // Create path if necessary
     func createPathIfNecessary(forFilePath filePath:NSURL) {
         let fileManager: NSFileManager = NSFileManager.defaultManager()
-        let path: NSURL = filePath.URLByDeletingLastPathComponent!
+        let path: NSURL = filePath.URLByDeletingLastPathComponent
         var error: NSError?
-        var pathWasCreated: Bool = fileManager.createDirectoryAtPath(path.path!, withIntermediateDirectories: true, attributes: nil, error: &error)
+        var pathWasCreated: Bool = fileManager.createDirectoryAtPath(path.path, withIntermediateDirectories: true, attributes: nil, error: &error)
         if !pathWasCreated {
             SugarRecord.handle(error!)
         }
@@ -692,20 +646,20 @@ extension NSPersistentStore {
         return directory(.ApplicationSupportDirectory).stringByAppendingPathComponent(applicationName)
     }
     
-    class func storeUrl(forDatabaseName dbName: String) -> (NSURL) {
+    class func storeUrl(forDatabaseName dbName: String) -> (url: NSURL) {
         let paths: [String] = [applicationDocumentsDirectory(), applicationStorageDirectory()]
         let fileManager: NSFileManager = NSFileManager()
         
         for path:String in paths {
             let filePath: String = path.stringByAppendingPathComponent(dbName)
             if fileManager.fileExistsAtPath(filePath) {
-                return NSURL.fileURLWithPath(filePath)!
+                return NSURL.fileURLWithPath(filePath)
             }
         }
-        return NSURL.fileURLWithPath(applicationStorageDirectory().stringByAppendingPathComponent(dbName))!
+        return NSURL.fileURLWithPath(applicationStorageDirectory().stringByAppendingPathComponent(dbName))
     }
     
-    class func defaultStoreUrl() -> (NSURL) {
+    class func defaultStoreUrl() -> (url: NSURL) {
         return storeUrl(forDatabaseName: srDefaultDatabaseName)
     }
     
@@ -717,7 +671,7 @@ extension NSPersistentStore {
 
 // MARK - NSManagedObject - SUGARRECORD extension
 extension NSManagedObject {
-    class func entityName() -> (String) {
+    class func entityName() -> (entityName: String) {
         var entityName: String?
         
         if (self.respondsToSelector(Selector("entityName"))) {
@@ -731,7 +685,7 @@ extension NSManagedObject {
         return entityName!
     }
     
-    class func entityDescriptionInContext(context: NSManagedObjectContext) -> (NSEntityDescription) {
+    class func entityDescriptionInContext(context: NSManagedObjectContext) -> (entityDescription: NSEntityDescription) {
         var entityName: String = self.entityName()
         return NSEntityDescription.entityForName(entityName, inManagedObjectContext: context)
     }
@@ -746,9 +700,9 @@ extension NSManagedObject {
         case lasts(Int)
     }
     
+
     ////// FINDERS //////
-    
-    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> ([NSManagedObject]) {
+    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (objects: [NSManagedObject]) {
         let fetchRequest: NSFetchRequest = request(fetchedObjects, inContext: context, filteredBy: filter, sortedBy: sortDescriptors)
         if context == nil && NSManagedObjectContext.defaultContext() != nil {
             context = NSManagedObjectContext.defaultContext()!
@@ -759,7 +713,7 @@ extension NSManagedObject {
         return self.executeFetchRequest(fetchRequest, inContext: context!)
     }
     
-    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, sortedBy: String, ascending: Bool) -> ([NSManagedObject]) {
+    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, sortedBy: String, ascending: Bool) -> (objects: [NSManagedObject]) {
         let fetchRequest: NSFetchRequest = request(fetchedObjects, inContext: context, filteredBy: filter, sortedBy: sortedBy, ascending: ascending)
         if context == nil && NSManagedObjectContext.defaultContext() != nil {
             context = NSManagedObjectContext.defaultContext()!
@@ -770,7 +724,7 @@ extension NSManagedObject {
         return self.executeFetchRequest(fetchRequest, inContext: context!)
     }
     
-    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, attribute: String, value: String, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> ([NSManagedObject]) {
+    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, attribute: String, value: String, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (objects: [NSManagedObject]) {
         let fetchRequest: NSFetchRequest = request(fetchedObjects, inContext: context, withAttribute: attribute, andValue: value, sortedBy: sortDescriptors)
         if context == nil && NSManagedObjectContext.defaultContext() != nil {
             context = NSManagedObjectContext.defaultContext()!
@@ -781,7 +735,7 @@ extension NSManagedObject {
         return self.executeFetchRequest(fetchRequest, inContext: context!)
     }
     
-    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, attribute: String, value: String, sortedBy: String, ascending: Bool) -> ([NSManagedObject]) {
+    class func find(fetchedObjects: FetchedObjects, var inContext context: NSManagedObjectContext?, attribute: String, value: String, sortedBy: String, ascending: Bool) -> (objects: [NSManagedObject]) {
         let fetchRequest: NSFetchRequest = request(fetchedObjects, inContext: context, withAttribute: attribute, andValue: value, sortedBy: sortedBy, ascending: ascending)
         if context == nil && NSManagedObjectContext.defaultContext() != nil {
             context = NSManagedObjectContext.defaultContext()!
@@ -792,7 +746,7 @@ extension NSManagedObject {
         return self.executeFetchRequest(fetchRequest, inContext: context!)
     }
     
-    class func findAndCreate(var inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String) -> (NSManagedObject) {
+    class func findAndCreate(var inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String) -> (object: NSManagedObject) {
         let fetchRequest: NSFetchRequest = request(.first, inContext: context, withAttribute: attribute, andValue: value, sortedBy: nil)
         if context == nil && NSManagedObjectContext.defaultContext() != nil {
             context = NSManagedObjectContext.defaultContext()!
@@ -819,7 +773,7 @@ extension NSManagedObject {
         if context == nil {
             context = NSManagedObjectContext.defaultContext()
         }
-        let count: Int = context!.countForFetchRequest(fetchRequest(inContext: context), error: &error)
+        let count: Int = context!.countForFetchRequest(request(inContext: context), error: &error)
         SugarRecord.handle(error)
         return count
     }
@@ -856,7 +810,7 @@ extension NSManagedObject {
     ////// REQUESTS //////
     
     // Create and returns the fetch request
-    class func fetchRequest(var inContext context: NSManagedObjectContext?) -> (NSFetchRequest) {
+    class func request(var inContext context: NSManagedObjectContext?) -> (fetchRequest: NSFetchRequest) {
         if context == nil {
             context = NSManagedObjectContext.defaultContext()
         }
@@ -866,8 +820,8 @@ extension NSManagedObject {
         return request
     }
     
-    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (NSFetchRequest) {
-        var fetchRequest: NSFetchRequest = self.fetchRequest(inContext: context)
+    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (fetchRequest: NSFetchRequest) {
+        var fetchRequest: NSFetchRequest = self.request(inContext: context)
         
         // Order
         var revertOrder: Bool = false
@@ -901,16 +855,16 @@ extension NSManagedObject {
         return fetchRequest
     }
     
-    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, sortedBy: String, ascending: Bool) -> (NSFetchRequest) {
+    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, filteredBy filter: NSPredicate?, sortedBy: String, ascending: Bool) -> (fetchRequest: NSFetchRequest) {
         return request(fetchedObjects, inContext: context, filteredBy: filter, sortedBy: [NSSortDescriptor(key: sortedBy, ascending: ascending)])
     }
     
-    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (NSFetchRequest) {
+    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String, var sortedBy sortDescriptors: [NSSortDescriptor]?) -> (fetchRequest: NSFetchRequest) {
         let predicate: NSPredicate = NSPredicate(format: "\(attribute) = \(value)", argumentArray: nil)
         return request(fetchedObjects, inContext: context, filteredBy: predicate, sortedBy: sortDescriptors)
     }
     
-    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String, sortedBy: String, ascending: Bool) -> (NSFetchRequest) {
+    class func request(fetchedObjects: FetchedObjects, inContext context: NSManagedObjectContext?, withAttribute attribute: String, andValue value:String, sortedBy: String, ascending: Bool) -> (fetchRequest: NSFetchRequest) {
         let predicate: NSPredicate = NSPredicate(format: "\(attribute) = \(value)", argumentArray: nil)
         return request(fetchedObjects, inContext: context, filteredBy: predicate, sortedBy: [NSSortDescriptor(key: sortedBy, ascending: ascending)])
     }
@@ -929,7 +883,7 @@ extension NSManagedObject {
         context!.performBlockAndWait { () -> Void in
             var error: NSError? = nil
             objects = context!.executeFetchRequest(fetchRequest, error: &error) as [NSManagedObject]
-            if error != nil {
+            if objects == nil && error != nil {
                 SugarRecord.handle(error!)
             }
         }
