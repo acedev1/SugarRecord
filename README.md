@@ -7,9 +7,11 @@ SugarRecord is a CoreData management library to make it easier work with CoreDat
 ### Pending stuff
 - Review closures retaining
 - Methods to get fetchedResultsController.
+- Explain how to integrate it in your project (git submodule)
 - Generate documentation with the ruby script
 - Integrate with iCloud
 - Add tests
+- Update the wrong stack image
 
 ### Index
 - [Features](#features)
@@ -17,6 +19,7 @@ SugarRecord is a CoreData management library to make it easier work with CoreDat
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [How to use SugarRecord](#how-to-use-sugarrecord)
+  - [Library useful methods](#library-useful-methods)
   - [Initialize SugarRecord](#initialize-sugarrecord)
   - [Logging levels](#logging-levels)
   - [Examples](#examples)
@@ -26,8 +29,6 @@ SugarRecord is a CoreData management library to make it easier work with CoreDat
       - [Background operation without saving](#background-operation-without-saving)
       - [Background operation saving](#background-operation-saving)
 - [Keep in mind](#keep-in-mind)
-- [Developers tips](#developers-tips)
-  - [Documentation generation](#documentation-generation)
 - [Notes](#notes)
   - [Useful Swift Resources](#useful-swift-resources)
 - [Contribute](#contribute)
@@ -56,12 +57,22 @@ _* Scheduled to coincide with Swift 1.0 release_
 
 ## Installation
 
-_The infrastructure and best practices for distributing Swift libraries is currently being developed by the developer community during this beta period of the language and Xcode. In the meantime, you can simply add SugarRecord as a git submodule, and drag the `SugarRecord` folder into your Xcode project._
+_The infrastructure and best practices for distributing Swift libraries is currently being developed by the developer community during this beta period of the language and Xcode. In the meantime, you can simply add SugarRecord as a git submodule, and drag the `SugarRecord.swift` file into your Xcode project._
 
 ---
 
 
 ## How to use SugarRecord
+### Library useful methods
+
+In this main class you'll finde usefull static methods linke the following ones:
+
+- **cleanUp():** Cleans the stack and notifies it using KVO and notification key `srKVOCleanedUpNotification`
+- **cleanUpStack():** Cleans the stack
+- **currentStack():** Returns a String with the current stack information
+- **currentVersion():** Return the current SugarRecord version as a String
+- **defaultDatabaseName():** Returns the default database name that will be used unless you pass your own one in the initialization.
+
 ### Initialize SugarRecord
 
 To start working with SugarRecord the first thing you have to do is to initialize the entire stack (persistent store, persistent store coordinator, and contexts stack). The simplest way to do it is through the call:
@@ -168,13 +179,6 @@ let berlinUsers: [NSManagedObject] = User.find(.all, inContext: context, attribu
 - NSManagedObjectIDs and move objects between contexts
 - Not referencing objects
 
-## Developers tips
-### Documentation generation
-- The project has a target that uses `appledoc` to generate the documentation from the docs comments
-- The best way to follow the docummentation patters is using the plugin for XCode VVDocumenter
-- If you want to update the documentation you have to install appledoc in your OSX, `brew install appledoc`
-- Once installed build the app in the **Documentation** target
-
 ## Notes
 SugarRecord is hardly inspired in **Magical Record**. We loved its structure and we brought some of these ideas to SugarRecord CoreData stack but using sugar Swift syntax and adding more useful methods to make working with CoreData easier.
 
@@ -186,8 +190,6 @@ SugarRecord is hardly inspired in **Magical Record**. We loved its structure and
 - Jazzy, a library to generate documentation: https://github.com/realm/jazzy
 - How to document your project: http://www.raywenderlich.com/66395/documenting-in-xcode-with-headerdoc-tutorial
 - Tests intersting articles: http://www.objc.io/issue-15/
-- iCloud + CoreData (objc.io): http://www.objc.io/issue-10/icloud-core-data.html
-- Appledoc, documentation generator: https://github.com/tomaz/appledoc 
 
 ## License
 The MIT License (MIT)
