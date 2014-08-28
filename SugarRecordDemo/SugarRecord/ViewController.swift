@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
     
         // Initializing stack
-        SugarRecord.setupCoreDataStack(automigrating: true, databaseName: nil)
+        SugarRecord.setupCoreDataStack(true, databaseName: nil)
         
 //        // Creating a person
 //        SugarRecord.save(inBackground: true, savingBlock: { (context) -> () in
