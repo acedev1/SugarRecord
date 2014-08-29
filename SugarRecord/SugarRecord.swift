@@ -15,22 +15,21 @@ let srSugarRecordVersion: String = "v0.0.1 - Alpha"
 let srBackgroundQueueName: String = "sugarRecord.backgroundQueue"
 
 // MARK: Options
-let srShouldAutoCreateManagedObjectModel: Bool = true
-let srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
-let srsrShouldDeleteStoreOnModelMismatch: Bool = true
+var srShouldAutoCreateManagedObjectModel: Bool = true
+var srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
+var srsrShouldDeleteStoreOnModelMismatch: Bool = true
 
 // MARK: Dictionary Keys
-let srContextWorkingNameKey = "srContextWorkingNameKey"
+var srContextWorkingNameKey = "srContextWorkingNameKey"
 
 // MARK: KVO Keys
-let srKVOWillDeleteDatabaseKey: String = "srKVOWillDeleteDatabaseKey"
-let srKVOPSCMismatchCouldNotDeleteStore: String = "srKVOPSCMismatchCouldNotDeleteStore"
-let srKVOPSCMismatchDidDeleteStore: String = "srKVOPSCMismatchDidDeleteStore"
+let srKVOWillDeleteDatabaseKey = "srKVOWillDeleteDatabaseKey"
+let srKVOPSCMismatchCouldNotDeleteStore = "srKVOPSCMismatchCouldNotDeleteStore"
+let srKVOPSCMismatchDidDeleteStore = "srKVOPSCMismatchDidDeleteStore"
 let srKVOPSCMismatchWillRecreateStore = "KVOPSCMismatchWillRecreateStore"
 let srKVOPSCMismatchDidRecreateStore = "srKVOPSCMismatchDidRecreateStore"
 let srKVOPSCMMismatchCouldNotRecreateStore = "srKVOPSCMMismatchCouldNotRecreateStore"
 let srKVOCleanedUpNotification = "srKVOCleanedUpNotification"
-let srPSCDidCompleteiCloudSetupNotification = "srPSCDidCompleteiCloudSetupNotification"
 
 // MARK: SugarRecord Initialization
 
@@ -39,8 +38,12 @@ let srPSCDidCompleteiCloudSetupNotification = "srPSCDidCompleteiCloudSetupNotifi
  */
 class SugarRecord {
     struct Static {
-        static var onceToken : dispatch_once_t = 0
-        static var instance : SugarRecord? = nil
+        //static var onceToken : dispatch_once_t = 0
+        //static var instance : SugarRecord? = nil
+        
+        // -- I've seen it is only used for the save operations
+        // The queue itself is not guaranteed to run on any particular thread, 
+        // it might run on the main queue if it's a context using main queue concurrency type
         static var backgroundQueue : dispatch_queue_t? = nil
     }
     
@@ -50,7 +53,7 @@ class SugarRecord {
      :param: automigrating Specifies if the old database should be auto migrated
      :param: databaseName  Database name. If not passed, default one will be used
      */
-    class func setupCoreDataStack (automigrating: Bool?, databaseName: String?) -> () {
+    class func setupCoreDataStack(#automigrating: Bool?, databaseName: String?) {
         var psc: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator.defaultPersistentStoreCoordinator()
         if psc != nil {
             return
@@ -59,7 +62,7 @@ class SugarRecord {
             psc = NSPersistentStoreCoordinator.newCoordinator(databaseName!, automigrating: automigrating)
         }
         else {
-            psc = NSPersistentStoreCoordinator.newCoordinator(self.defaultDatabaseName(), automigrating: automigrating)
+            psc = NSPersistentStoreCoordinator.newCoordinator(SugarRecord.defaultDatabaseName(), automigrating: automigrating)
         }
         NSPersistentStoreCoordinator.setDefaultPersistentStoreCoordinator(psc!)
         NSManagedObjectContext.initializeContextsStack(psc!)
@@ -70,7 +73,7 @@ class SugarRecord {
 
      :param: databaseName String of the database to be deleted
      */
-    class func removeDatabaseNamed(databaseName: String) -> (Bool) {
+    class func removeDatabaseNamed(databaseName: String) -> Bool {
         let url: NSURL = NSPersistentStore.storeUrl(forDatabaseName: databaseName)
         let fileManager: NSFileManager = NSFileManager.defaultManager()
         var error: NSError?
@@ -86,7 +89,7 @@ class SugarRecord {
 
      :returns: Background Queue (lazy generated) queue
      */
-    class func backgroundQueue() -> (dispatch_queue_t) {
+    class func backgroundQueue() -> dispatch_queue_t {
         if Static.backgroundQueue == nil {
             Static.backgroundQueue = dispatch_queue_create(srBackgroundQueueName, nil)
         }
@@ -96,8 +99,8 @@ class SugarRecord {
     /**
      Clean up the stack and notifies it using key srKVOCleanedUpNotification
      */
-    class func cleanUp () -> () {
-        self.cleanUpStack()
+    class func cleanUp() {
+        SugarRecord.cleanUpStack()
         NSNotificationCenter.defaultCenter().postNotificationName(srKVOCleanedUpNotification, object: nil)
     }
 
@@ -116,14 +119,14 @@ class SugarRecord {
 
      :returns: String with the stack information (Model, Coordinator, Store, ...)
      */
-    class func currentStack () -> (String?) {
+    class func currentStack() -> String {
         var status: String = "SugarRecord stack \n ------- \n"
         status += "Model:       \(NSManagedObjectModel.defaultManagedObjectModel())\n"
         status += "Coordinator:       \(NSPersistentStoreCoordinator.defaultPersistentStoreCoordinator())\n"
         status += "Store:       \(NSPersistentStore.defaultPersistentStore())\n"
         status += "Default context:       \(NSManagedObjectContext.defaultContext())\n"
         status += "Saving context:       \(NSManagedObjectContext.rootSavingContext())\n"
-        return nil
+        return status
     }
     
     /**
@@ -131,7 +134,7 @@ class SugarRecord {
 
      :returns: String with the version value
      */
-    class func currentVersion() -> (String) {
+    class func currentVersion() -> String {
         return srSugarRecordVersion
     }
     
@@ -140,7 +143,7 @@ class SugarRecord {
             
      :returns: String with the default name (ended in .sqlite)
      */
-    class func defaultDatabaseName () -> (String){
+    class func defaultDatabaseName() -> String {
         var databaseName: String
         let bundleName: AnyObject? = NSBundle.mainBundle().infoDictionary[kCFBundleNameKey]
         if let name = bundleName as? String {
@@ -150,7 +153,7 @@ class SugarRecord {
             databaseName = srDefaultDatabaseName
         }
         if !databaseName.hasSuffix("sqlite") {
-            databaseName = databaseName.stringByAppendingPathExtension("sqlite")!
+            databaseName = databaseName.stringByAppendingPathExtension("sqlite")
         }
         return databaseName
     }
