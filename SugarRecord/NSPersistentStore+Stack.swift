@@ -70,7 +70,7 @@ extension NSPersistentStore {
 
      :returns: NSURL with the path
      */
-    public class func storeUrl(forDatabaseName dbName: String) -> (NSURL) {
+    class func storeUrl(forDatabaseName dbName: String) -> (NSURL) {
         let paths: [String] = [applicationDocumentsDirectory(), applicationStorageDirectory()]
         let fileManager: NSFileManager = NSFileManager()
         
@@ -88,7 +88,7 @@ extension NSPersistentStore {
 
      :returns: NSURL with the default store path
      */
-    public class func defaultStoreUrl() -> (NSURL) {
+    class func defaultStoreUrl() -> (NSURL) {
         return storeUrl(forDatabaseName: srDefaultDatabaseName)
     }
     
