@@ -15,23 +15,21 @@ let srSugarRecordVersion: String = "v0.0.1 - Alpha"
 let srBackgroundQueueName: String = "sugarRecord.backgroundQueue"
 
 // MARK: Options
-let srShouldAutoCreateManagedObjectModel: Bool = true
-let srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
-let srsrShouldDeleteStoreOnModelMismatch: Bool = true
+var srShouldAutoCreateManagedObjectModel: Bool = true
+var srShouldAutoCreateDefaultPersistentStoreCoordinator: Bool = false
+var srsrShouldDeleteStoreOnModelMismatch: Bool = true
 
 // MARK: Dictionary Keys
-let srContextWorkingNameKey = "srContextWorkingNameKey"
+var srContextWorkingNameKey = "srContextWorkingNameKey"
 
 // MARK: KVO Keys
-let srKVOWillDeleteDatabaseKey: String = "srKVOWillDeleteDatabaseKey"
-let srKVOPSCMismatchCouldNotDeleteStore: String = "srKVOPSCMismatchCouldNotDeleteStore"
-let srKVOPSCMismatchDidDeleteStore: String = "srKVOPSCMismatchDidDeleteStore"
-let srKVOPSCMismatchWillRecreateStore = "KVOPSCMismatchWillRecreateStore"
-let srKVOPSCMismatchDidRecreateStore = "srKVOPSCMismatchDidRecreateStore"
-let srKVOPSCMMismatchCouldNotRecreateStore = "srKVOPSCMMismatchCouldNotRecreateStore"
-let srKVOCleanedUpNotification = "srKVOCleanedUpNotification"
-let srKVOPSCDidCompleteiCloudSetupNotification = "srKVOPSCDidCompleteiCloudSetupNotification"
-let srKVODidMergeChangesFromiCloudNotification = "srKVODidMergeChangesFromiCloudNotification"
+var srKVOWillDeleteDatabaseKey: String = "srKVOWillDeleteDatabaseKey"
+var srKVOPSCMismatchCouldNotDeleteStore: String = "srKVOPSCMismatchCouldNotDeleteStore"
+var srKVOPSCMismatchDidDeleteStore: String = "srKVOPSCMismatchDidDeleteStore"
+var srKVOPSCMismatchWillRecreateStore = "KVOPSCMismatchWillRecreateStore"
+var srKVOPSCMismatchDidRecreateStore = "srKVOPSCMismatchDidRecreateStore"
+var srKVOPSCMMismatchCouldNotRecreateStore = "srKVOPSCMMismatchCouldNotRecreateStore"
+var srKVOCleanedUpNotification = "srKVOCleanedUpNotification"
 
 // MARK: SugarRecord Initialization
 

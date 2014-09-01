@@ -14,7 +14,6 @@ extension NSManagedObjectContext {
     struct Static {
         static var rootSavingContext: NSManagedObjectContext? = nil
         static var defaultContext: NSManagedObjectContext? = nil
-        static var ubiquitySetupNotificationObserver: AnyObject? = nil
     }
 
     /**
@@ -56,23 +55,10 @@ extension NSManagedObjectContext {
     
     // Default Context Setter
     class func setDefaultContext(context: NSManagedObjectContext?) {
-
-        let coordinator: NSPersistentStoreCoordinator = NSPersistentStoreCoordinator.defaultPersistentStoreCoordinator()!
-
         // Removing observer if existing defaultContext
         if Static.defaultContext != nil  {
             NSNotificationCenter.defaultCenter().removeObserver(Static.defaultContext!)
         }
-
-        if Static.ubiquitySetupNotificationObserver != nil {
-            NSNotificationCenter.defaultCenter().removeObserver(Static.ubiquitySetupNotificationObserver!)
-            Static.ubiquitySetupNotificationObserver = nil
-        }
-
-        if SugarRecord.iCloudEnabled() && Static.defaultContext != nil{
-            Static.defaultContext?.stopObservingiCloudChanges(inCoordinator: coordinator)
-        }
-
         Static.defaultContext = context
         if Static.defaultContext == nil {
             return
@@ -85,16 +71,7 @@ extension NSManagedObjectContext {
         }
         Static.defaultContext!.addObserverToGetPermanentIDsBeforeSaving()
 
-        if SugarRecord.iCloudEnabled() {
-            Static.defaultContext?.observeiCloudChanges(inCoordinator: coordinator)
-        }
-        else {
-            Static.ubiquitySetupNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(srKVOPSCDidCompleteiCloudSetupNotification, object: nil, queue: NSOperationQueue.mainQueue(), usingBlock: {(notification: NSNotification!) in
-                    Static.defaultContext?.observeiCloudChanges(inCoordinator: coordinator)
-                })
-        }
     }
-
 
     /**
      Creates a new context with a passed psc as a persistant store coordinator
