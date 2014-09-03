@@ -42,7 +42,7 @@ extension NSManagedObjectContext {
             })
         }
         
-        var saveClosure: () -> () = {
+        var saveBlock: () -> () = {
             var saveResult: Bool = false
             var error: NSError?
             saveResult = self.save(&error)
@@ -50,7 +50,7 @@ extension NSManagedObjectContext {
                 SugarRecord.handle(error!)
             }
             if (saveResult && savingParents && self.parentContext != nil) {
-                self.parentContext.save(synchronously, savingParents: savingParents, completion: completion)
+                self.parentContext!.save(synchronously, savingParents: savingParents, completion: completion)
             }
             else {
                 if saveResult {
@@ -64,10 +64,10 @@ extension NSManagedObjectContext {
         
         // Saving otherwise
         if synchronously {
-            self.performBlockAndWait(saveClosure)
+            self.performBlockAndWait(saveBlock)
         }
         else {
-            self.performBlock(saveClosure)
+            self.performBlock(saveBlock)
         }
     }
 }
