@@ -42,7 +42,7 @@ extension NSManagedObjectContext {
             })
         }
         
-        var saveClosure: () -> () = {
+        var saveBlock: () -> () = {
             var saveResult: Bool = false
             var error: NSError?
             saveResult = self.save(&error)
@@ -64,10 +64,10 @@ extension NSManagedObjectContext {
         
         // Saving otherwise
         if synchronously {
-            self.performBlockAndWait(saveClosure)
+            self.performBlockAndWait(saveBlock)
         }
         else {
-            self.performBlock(saveClosure)
+            self.performBlock(saveBlock)
         }
     }
 }
