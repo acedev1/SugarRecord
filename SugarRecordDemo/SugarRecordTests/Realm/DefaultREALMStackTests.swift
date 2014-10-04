@@ -46,16 +46,15 @@ class DefaultREALMStackTests: XCTestCase {
         waitForExpectationsWithTimeout(0.2, handler: nil)
     }
     
-    //TODO - Review it
-    // func testDatabaseRemoval()
-    // {
-    //     let stack = DefaultREALMStack(stackName: "test", stackDescription: "test stack")
-    //     SugarRecord.addStack(stack)
-    //     let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
-    //     let databaseName: String = documentsPath.stringByAppendingPathComponent("default.realm")
-    //     XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtPath(databaseName), "The database is not created in the right place")
-    //     stack.removeDatabase()
-    //     XCTAssertFalse(NSFileManager.defaultManager().fileExistsAtPath(databaseName), "The database is not created in the right place")
-    //     SugarRecord.removeAllStacks()
-    // }
+    func testDatabaseRemoval()
+    {
+        let stack = DefaultREALMStack(stackName: "test", stackDescription: "test stack")
+        SugarRecord.addStack(stack)
+        let documentsPath: String = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        let databaseName: String = documentsPath.stringByAppendingPathComponent("default.realm")
+        XCTAssertTrue(NSFileManager.defaultManager().fileExistsAtPath(databaseName), "The database is not created in the right place")
+        stack.removeDatabase()
+        XCTAssertFalse(NSFileManager.defaultManager().fileExistsAtPath(databaseName), "The database is not created in the right place")
+        SugarRecord.removeAllStacks()
+    }
 }
