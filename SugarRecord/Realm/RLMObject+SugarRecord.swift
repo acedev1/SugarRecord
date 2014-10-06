@@ -280,5 +280,3 @@ extension RLMObject: SugarRecordObjectProtocol
         self.context().endWriting()
     }
 }
-
-
