@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CoreData
 
 // MARK: Fetched Results Controller
 
