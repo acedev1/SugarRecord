@@ -93,8 +93,7 @@ class SugarRecordRLMContextTests: XCTestCase
         
         let context: MockRLMContext = MockRLMContext(realmContext: RLMRealm())
         let object: RealmObject = RealmObject()
-        //TODO - Review
-//        context.deleteObjects(SugarRecordRLMResults(realmResults: RLMResults(), finder: SugarRecordFinder()))
-//        XCTAssertTrue(context.deleteObjectCalled, "Delete object should be called when deleting multiple objects")
+        context.deleteObjects([object])
+        XCTAssertTrue(context.deleteObjectCalled, "Delete object should be called when deleting multiple objects")
     }
 }

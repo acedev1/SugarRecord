@@ -86,17 +86,17 @@ public class SugarRecordCDContext: SugarRecordContext
     
     :returns: Objects fetched
     */
-    public func find(finder: SugarRecordFinder) -> SugarRecordResultsProtocol
+    public func find(finder: SugarRecordFinder) -> [AnyObject]
     {
         let fetchRequest: NSFetchRequest = SugarRecordCDContext.fetchRequest(fromFinder: finder)
         var error: NSError?
         var objects: [AnyObject]? = self.contextCD.executeFetchRequest(fetchRequest, error: &error)
         SugarRecordLogger.logLevelInfo.log("Found \(objects?.count) objects in database")
         if objects == nil  {
-            return SugarRecordCDResults(results: [NSManagedObject]())
+            return [AnyObject]()
         }
         else {
-            return SugarRecordCDResults(results: objects as [NSManagedObject])
+            return objects!
         }
     }
     
@@ -163,15 +163,11 @@ public class SugarRecordCDContext: SugarRecordContext
     
     :returns: If the deletion has been successful
     */
-    public func deleteObjects(objects: SugarRecordResultsProtocol) -> ()
+    public func deleteObjects(objects: [AnyObject]) -> ()
     {
         var objectsDeleted: Int = 0
-        
-        for (var index = 0; index < Int(objects.count) ; index++) {
-            let object: AnyObject! = objects[index]
-            if (object != nil) {
-                let _ = deleteObject(object)
-            }
+        for object in objects {
+            let _ = deleteObject(object)
         }
         SugarRecordLogger.logLevelInfo.log("Deleted \(objects.count) objects")
     }
