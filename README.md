@@ -17,7 +17,9 @@ The library is completetly written in Swift and fully tested to ensure the behav
 
 **There's a Google Group where you can leave your topics, question, doubts, suggestions and stuff besides issues https://groups.google.com/forum/#!forum/sugarrecord .**
 
-**Powered by [@pepibumur](http://www.twitter.com/pepibumur) with the help of [@isaacroldan](www.twitter.com/saky), [@rdougan](www.twitter.com/rdougan) and some developers**
+**Moreover we have a blog to talk about the library, check it here: [http://www.sugarrecord.com/](http://www.sugarrecord.com)**
+
+**Powered by [@pepibumur](http://www.twitter.com/pepibumur)**
 
 ![image](https://raw.githubusercontent.com/SugarRecord/SugarRecord/develop/Resources/scheme.png)
 The scheme above shows the structure of SugarRecord. It's formed by:
@@ -37,7 +39,6 @@ If you want to stay updated we have a mailing list. We'll send emails with new u
 
 | **Date**               | **Done**                     |
 |-------------------------------|------------------------------------------------|
-| 25th-December-2014 | Setup SugaRecord.podspec file |
 | 25th-December-2014 | Added new results type SugarRecordResults |
 | 10th-December-2014 | Query response array is now non-optional |
 | 10th-December-2014 | Generated documentation using Jazzy |
