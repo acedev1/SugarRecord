@@ -82,7 +82,7 @@ public class SugarRecordRLMContext: SugarRecordContext
     
     :returns: Objects fetched
     */
-    public func find(finder: SugarRecordFinder) -> [AnyObject]
+    public func find<T>(finder: SugarRecordFinder<T>) -> SugarRecordResultsProtocol
     {
         let objectClass: RLMObject.Type = finder.objectClass as RLMObject.Type
         var filteredObjects: RLMResults? = nil
@@ -96,46 +96,7 @@ public class SugarRecordRLMContext: SugarRecordContext
         for sorter in finder.sortDescriptors {
             sortedObjects = sortedObjects.sortedResultsUsingProperty(sorter.key, ascending: sorter.ascending)
         }
-        
-        var objectsArray: [RLMObject] = [RLMObject]()
-        for index in 0..<sortedObjects.count {
-            objectsArray.append(sortedObjects.objectAtIndex(index) as RLMObject)
-        }
-        
-        var finalArray: [RLMObject] = [RLMObject]()
-        switch finder.elements {
-        case .first:
-            let object: RLMObject? = objectsArray.first
-            if object != nil {
-                finalArray.append(object!)
-            }
-        case .last:
-            let object: RLMObject? = objectsArray.last
-            if object != nil {
-                finalArray.append(object!)
-            }
-        case .firsts(let number):
-            var last: Int = number
-            if number > objectsArray.count {
-                last = objectsArray.count
-            }
-            for index in 0..<last {
-                finalArray.append(objectsArray[index])
-            }
-        case .lasts(let number):
-            objectsArray = objectsArray.reverse()
-            var last: Int = number
-            if number > objectsArray.count {
-                last = objectsArray.count
-            }
-            for index in 0..<last {
-                finalArray.append(objectsArray[index])
-            }
-        case .all:
-            finalArray = objectsArray
-        }
-        SugarRecordLogger.logLevelInfo.log("Found \(finalArray.count) objects in database")
-        return finalArray
+        return SugarRecordRLMResults(realmResults: sortedObjects, finder: finder)
     }
     
     /**
@@ -158,30 +119,14 @@ public class SugarRecordRLMContext: SugarRecordContext
     
     :returns: If the delection has been successful
     */
-    public func deleteObjects(objects: [AnyObject]) -> ()
+    public func deleteObjects(objects: SugarRecordResultsProtocol) -> ()
     {
-        var objectsDeleted: Int = 0
-        for object in objects {
-            let _ = deleteObject(object)
+        for (var index = 0; index < Int(objects.count) ; index++) {
+            let object: AnyObject! = objects[index]
+            if (object != nil) {
+                let _ = deleteObject(object)
+            }
         }
         SugarRecordLogger.logLevelInfo.log("Deleted \(objects.count) objects")
     }
-    
-    
-    /**
-    *  Count the number of entities of the given type
-    */
-    public func count(objectClass: AnyClass, predicate: NSPredicate? = nil) -> Int
-    {
-        let objectClass: RLMObject.Type = objectClass as RLMObject.Type
-        var objects: RLMResults? = nil
-        if predicate != nil {
-            objects = objectClass.objectsWithPredicate(predicate)
-        }
-        else {
-            objects = objectClass.allObjectsInRealm(self.realmContext)
-        }
-        return Int(objects!.count)
-    }
-
 }
