@@ -17,7 +17,7 @@ SugarRecord is a persistence wrapper designed to make working with persistence s
 The library is maintained by [@pepibumur](https://github.com/pepibumur). You can reach me at [pepibumur@gmail.com](mailto://pepibumur@gmail.com) for help or whatever you need to commend about the library.
 
 ## Features
-- Swift 2.1 compatible (XCode 7.1).
+- Swift 2.1 compatible (Xcode 7.1).
 - Fully rewritten from the version 1.0.
 - Reactive API (using ReactiveCocoa).
 - Protocols based design.
@@ -34,7 +34,7 @@ The library is maintained by [@pepibumur](https://github.com/pepibumur). You can
 ### [CocoaPods](https://cocoapods.org)
 
 1. Install [CocoaPods](https://cocoapods.org). You can do it with `gem install cocoapods`
-2. Edit your `Podfile` file and add the following line `pod 'SugarRecord'`
+2. Edit your `Podfile` file and add the following line `pod 'SugarRecord'
 3. Update your pods with the command `pod install`
 4. Open the project from the generated workspace (`.xcworkspace` file).
 
