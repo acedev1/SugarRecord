@@ -34,7 +34,7 @@ The library is maintained by [@pepibumur](https://github.com/pepibumur). You can
 ### [CocoaPods](https://cocoapods.org)
 
 1. Install [CocoaPods](https://cocoapods.org). You can do it with `gem install cocoapods`
-2. Edit your `Podfile` file and add the following line `pod 'SugarRecord'
+2. Edit your `Podfile` file and add the following line `pod 'SugarRecord'`
 3. Update your pods with the command `pod install`
 4. Open the project from the generated workspace (`.xcworkspace` file).
 
@@ -57,7 +57,7 @@ pod "SugarRecord/Realm+RAC"
 
 ### [Carthage](https://carthage)
 1. Install [Carthage](https://github.com/carthage/carthage) on your computer using `brew install carthage`
-3. Edit your `Cartfile` file adding the following line `github 'pepibumur/sugarrecord'`
+3. Edit your `Cartfile` file adding the following line `github "pepibumur/sugarrecord"`
 4. Update and build frameworks with `carthage update`
 5. Add generated frameworks to your app main target following the steps [here](https://github.com/carthage/carthage)
 6. Link your target with **CoreData** library *(from Build Phases)*
