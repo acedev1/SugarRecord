@@ -77,9 +77,9 @@ class ReactiveStorageTests: QuickSpec {
         
         describe("rac_fetch") {
             it("should execute the fetch and return the results") {
-                _ = try? storage?.operation({ (context, save) -> Void in
+                storage?.operation({ (context, save) -> Void in
                     let _: Issue = try! context.create()
-                    save()
+                    _ = try? save()
                 })
                 _ = storage?.rx_fetch(Request<Issue>()).subscribeNext({ (issues) -> Void in
                     expect(issues.count) == 1
@@ -89,10 +89,10 @@ class ReactiveStorageTests: QuickSpec {
         
         describe("rac_backgroundFetch") {
             it("should execute the fetch mapping the returned objects") {
-                _ = try? storage?.operation({ (context, save) -> Void in
+                storage?.operation({ (context, save) -> Void in
                     let issue: Issue = try! context.create()
                     issue.name = "olakase"
-                    save()
+                    _ = try? save()
                 })
                 waitUntil(action: { (done) -> Void in
                     storage?.rac_backgroundFetch(Request<Issue>(), mapper: mapper)
@@ -106,10 +106,10 @@ class ReactiveStorageTests: QuickSpec {
         
         describe("rx_backgroundFetch") {
             it("should execute the fetch mapping the returned objects") {
-                _ = try? storage?.operation({ (context, save) -> Void in
+                storage?.operation({ (context, save) -> Void in
                     let issue: Issue = try! context.create()
                     issue.name = "olakase"
-                    save()
+                    _ = try? save()
                 })
                 waitUntil(action: { (done) -> Void in
                     _ = storage?.rx_backgroundFetch(Request<Issue>(), mapper: mapper).subscribeNext({ (results) -> Void in
