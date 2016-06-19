@@ -6,7 +6,7 @@ public enum ObservableChange<T> {
     case Error(NSError)
 }
 
-public class RequestObservable<T: Entity>: NSObject {
+public class Observable<T: Entity>: NSObject {
     
     // MARK: - Attributes
     
