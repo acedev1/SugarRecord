@@ -3,15 +3,17 @@ import RxSwift
 
 public extension Storage {
 
-    func rx_operation(op: (context: Context, save: () -> Void) throws -> Void) -> RxSwift.Observable<Void> {
-        return RxSwift.Observable.create { (observer) -> RxSwift.Disposable in
+    func rx_operation<T>(op: (context: Context, save: () -> Void) throws -> T) -> Observable<T> {
+        return Observable.create { (observer) -> Disposable in
             do {
-                try self.operation { (context, saver) throws -> Void in
+                let returnedObject = try self.operation { (context, saver) throws -> T in
                     try op(context: context, save: { () -> Void in
                         saver()
                     })
-                    observer.onCompleted()
                 }
+                
+                observer.onNext(returnedObject)
+                observer.onCompleted()
             }
             catch {
                 observer.onError(error)
@@ -20,22 +22,28 @@ public extension Storage {
         }
     }
     
-    func rx_operation(op: (context: Context) -> Void) -> RxSwift.Observable<Void> {
+    func rx_operation<T>(op: (context: Context) throws -> T) -> Observable<T> {
         return rx_operation { (context, save) in
-            op(context: context)
+            
+            let returnedObject = try op(context: context)
             save()
+            
+            return returnedObject
         }
     }
     
-    func rx_backgroundOperation(op: (context: Context, save: () -> Void) throws -> Void) -> RxSwift.Observable<Void> {
-        return RxSwift.Observable.create { (observer) -> RxSwift.Disposable in
+    func rx_backgroundOperation<T>(op: (context: Context, save: () -> Void) throws -> T) -> Observable<T> {
+        return Observable.create { (observer) -> Disposable in
             do {
-                try self.operation { (context, saver) throws in
+                let returnedObject = try self.operation { (context, saver) throws -> T in
                     try op(context: context, save: { () -> Void in
                         saver()
                     })
-                    observer.onCompleted()
                 }
+                
+                observer.onNext(returnedObject)
+                observer.onCompleted()
+
             }
             catch {
                 observer.onError(error)
@@ -44,15 +52,18 @@ public extension Storage {
         }
     }
     
-    func rx_backgroundOperation(op: (context: Context) throws -> Void) -> RxSwift.Observable<Void> {
+    func rx_backgroundOperation<T>(op: (context: Context) throws -> T) -> Observable<T> {
         return rx_backgroundOperation { (context, save) throws in
-            try op(context: context)
+            
+            let returnedObject = try op(context: context)
             save()
+            
+            return returnedObject
         }
     }
     
-    func rx_backgroundFetch<T, U>(request: Request<T>, mapper: T -> U) -> RxSwift.Observable<[U]> {
-        let observable: RxSwift.Observable<[T]> = RxSwift.Observable.create { (observer) -> RxSwift.Disposable in
+    func rx_backgroundFetch<T, U>(request: Request<T>, mapper: T -> U) -> Observable<[U]> {
+        let observable: Observable<[T]> = Observable.create { (observer) -> Disposable in
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
             dispatch_async(dispatch_get_global_queue(priority, 0)) {
                 do {
@@ -77,8 +88,8 @@ public extension Storage {
             .observeOn(MainScheduler.instance)
     }
 
-    func rx_fetch<T>(request: Request<T>) -> RxSwift.Observable<[T]> {
-        return RxSwift.Observable.create { (observer) -> RxSwift.Disposable in
+    func rx_fetch<T>(request: Request<T>) -> Observable<[T]> {
+        return Observable.create { (observer) -> Disposable in
             do {
                 try observer.onNext(self.fetch(request))
                 observer.onCompleted()

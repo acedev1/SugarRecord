@@ -64,7 +64,7 @@ pod "SugarRecord/Realm+RAC"
 6. Link your target with **CoreData** library *(from Build Phases)*
 
 #### Notes
-- Carthage integration includes both, CoreData and Carthage. We're planning to separate it in multiple frameworks. [Task](https://trello.com/c/hyhN1Tp2/11-create-separated-frameworks-for-foundation-coredata-and-realm)
+- Carthage integration includes both, CoreData and Realm. We're planning to separate it in multiple frameworks. [Task](https://trello.com/c/hyhN1Tp2/11-create-separated-frameworks-for-foundation-coredata-and-realm)
 - SugarRecord 2.0 is not compatible with the 1.x interface. If you were using that version you'll have to update your project to support this version.
 
 ## Reference
@@ -197,13 +197,13 @@ catch {
 `Storage`s offer a reactive API that you can use if your app follows the Reactive paradigm. SugarRecord supports the two main Reactive libraries for Swift, [ReactiveCocoa](https://github.com/reactivecocoa/reactivecocoa) and [RxSwift](https://github.com/ReactiveX/RxSwift). Methods prefixes are `rac_` and `rx_` respectively:
 
 ```swift
-// Executes the operation and notifies the completion/error to the producer.
-func rac_operation(operation: (context: Context, save: Saver) -> Void) -> SignalProducer<Void, NoError>
-func rx_operation(operation: (context: Context, save: Saver) -> Void) -> Observable<Void>
+// Executes the operation and notifies the completion/error to the producer. Optionally returns an object from the operation (such as the id of a newly created object)
+func rac_operation<T>(operation: (context: Context, save: Saver) -> T) -> SignalProducer<T, NoError>
+func rx_operation<T>(operation: (context: Context, save: Saver) -> T) -> Observable<T>
 
-// Executes the operation in background and notifies the completion/error to the producer.
-func rac_backgroundOperation(operation: (context: Context, save: Saver) -> Void) -> SignalProducer<Void, NoError>
-func rx_backgroundOperation(operation: (context: Context, save: Saver) -> Void) -> Observable<Void>
+// Executes the operation in background and notifies the completion/error to the producer. Optionally returns an object from the operation (such as the id of a newly created object)
+func rac_backgroundOperation<T>(operation: (context: Context, save: Saver) -> T) -> SignalProducer<T, NoError>
+func rx_backgroundOperation<T>(operation: (context: Context, save: Saver) -> T) -> Observable<T>
 
 // Executes a fetch in a background thread mapping them into thread safe plain entities forwarding the results to the producer.
 func rac_backgroundFetch<T, U>(request: Request<T>, mapper: T -> U) -> SignalProducer<[U], Error>
@@ -218,15 +218,15 @@ func rx_fetch<T>(request: Request<T>) -> Observable<[T]>
 <br>
 > This is the first approach of SugarRecord for the  interface. We'll improve it with the feedback you can report and according to the use of the framework. Do not hesitate to reach us with your proposals. Everything that has to be with making the use of CoreData/Realm easier, funnier, and enjoyable is welcome! :tada:
 
-### Observable
+### RequestObservable
 
-SugarRecord provides a component, `Observable` that allows observing changes in the DataBase. It uses Realm notifications and CoreData `NSFetchedResultsController` under the hood.
+SugarRecord provides a component, `RequestObservable` that allows observing changes in the DataBase. It uses Realm notifications and CoreData `NSFetchedResultsController` under the hood.
 
 **Observing**
 
 ```swift
 class Presenter {
-  var observable: Observable<Track>!
+  var observable: RequestObservable<Track>!
 
   func setup() {
       let request: Request<Track> = Request<Track>().filteredWith("artist", equalTo: "pedro")
@@ -242,12 +242,14 @@ class Presenter {
   }
 }
 ```
-> **Retain**: Observable must be retained during the observation lifecycle. When the `Observable` instance gets released from memory it stops observing changes from your storage.
+> **Retain**: RequestObservable must be retained during the observation lifecycle. When the `RequestObservable` instance gets released from memory it stops observing changes from your storage.
+
+> **NOTE**: This was renamed from Observable -> RequestObservable so we are no longer stomping on the RxSwift Observable namespace.
 
 > **Reactive**: Observables can be also observed as Reactive sources using `rx_observe` or `rac_observe`.
-In this case there's no need to retain the `Observable` but dispose it whenever you're not interested anymore in observing changes.
+In this case there's no need to retain the `RequestObservable` but dispose it whenever you're not interested anymore in observing changes.
 
-**:warning: `Observable` is not available for CoreData + OSX**
+**:warning: `RequestObservable` is not available for CoreData + OSX**
 
 ### Example project
 

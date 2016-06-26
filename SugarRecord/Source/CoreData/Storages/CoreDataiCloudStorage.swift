@@ -40,12 +40,15 @@ public class CoreDataiCloudStorage: Storage {
         }
     }
     
-    public func operation(operation: (context: Context, save: () -> Void) throws -> Void) throws {
+    public func operation<T>(operation: (context: Context, save: () -> Void) throws -> T) throws -> T {
         let context: NSManagedObjectContext = (self.saveContext as? NSManagedObjectContext)!
         var _error: ErrorType!
+        
+        var returnedObject: T!
+        
         context.performBlockAndWait {
             do {
-                try operation(context: context, save: { () -> Void  in
+                returnedObject = try operation(context: context, save: { () -> Void  in
                     do {
                         try context.save()
                     }
@@ -71,6 +74,8 @@ public class CoreDataiCloudStorage: Storage {
         if let error = _error {
             throw error
         }
+        
+        return returnedObject
     }
     
     public func removeStore() throws {
@@ -93,9 +98,11 @@ public class CoreDataiCloudStorage: Storage {
     // MARK: - Public
 
 #if os(iOS) || os(tvOS) || os(watchOS)
-    public func observable<T: NSManagedObject where T:Equatable>(request: Request<T>) -> Observable<T> {
+    
+    public func observable<T: NSManagedObject where T:Equatable>(request: Request<T>) -> RequestObservable<T> {
         return CoreDataObservable(request: request, context: self.mainContext as! NSManagedObjectContext)
     }
+    
 #endif
     
     // MARK: - Private

@@ -49,13 +49,15 @@ public class RealmDefaultStorage: Storage {
         }
     }
 
-    public func operation(operation: (context: Context, save: () -> Void) throws -> Void) throws {
+    public func operation<T>(operation: (context: Context, save: () -> Void) throws -> T) throws -> T {
         let context: Realm = self.saveContext as! Realm
         context.beginWrite()
         var save: Bool = false
         var _error: ErrorType!
+        
+        var returnedObject: T!
         do {
-            try operation(context: context, save: { () -> Void in
+            returnedObject = try operation(context: context, save: { () -> Void in
                 defer {
                     save = true
                 }
@@ -77,9 +79,12 @@ public class RealmDefaultStorage: Storage {
         if let error = _error {
             throw error
         }
+        
+        return returnedObject
+
     }
     
-    public func observable<T: Object>(request: Request<T>) -> Observable<T> {
+    public func observable<T: Object>(request: Request<T>) -> RequestObservable<T> {
         return RealmObservable(request: request, realm: self.mainContext as! Realm)
     }
     
