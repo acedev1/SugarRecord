@@ -3,20 +3,20 @@ import Foundation
 
 // MARK: Request extension (NSPredicateConvertible)
 
-extension FetchRequest: NSPredicateConvertible {
+extension Request: NSPredicateConvertible {
     
     public init(predicate: NSPredicate) {
-        self = FetchRequest(predicate: predicate)
+        self = Request(predicate: predicate)
     }
 }
 
 
 // MARK: Request extension (NSSortDescriptorConvertible)
 
-extension FetchRequest: NSSortDescriptorConvertible {
+extension Request: NSSortDescriptorConvertible {
     
     public init(sortDescriptor: NSSortDescriptor) {
-        self = FetchRequest(sortDescriptor: sortDescriptor)
+        self = Request(sortDescriptor: sortDescriptor)
     }
 
 }
