@@ -1,7 +1,6 @@
 # <center>![xcres](https://github.com/carambalabs/SugarRecord/raw/master/Assets/Banner.png)</center>
 
 [![Twitter: @carambalabs](https://img.shields.io/badge/contact-@carambalabs-blue.svg?style=flat)](https://twitter.com/carambalabs)
-[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/SugarRecord.svg)](https://img.shields.io/cocoapods/v/SugarRecord.svg)
 [![Language: Swift](https://img.shields.io/badge/lang-Swift-yellow.svg?style=flat)](https://developer.apple.com/swift/)
 [![Language: Swift](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](http://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/carambalabs/SugarRecord.svg)](https://travis-ci.org/carambalabs/SugarRecord)
@@ -15,11 +14,9 @@ The library is maintained by [@carambalabs](https://github.com/carambalabs). You
 
 :warning: Swift 2.3 support has been dropped with the version 3.0 :warning:
 
-[![paypal](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2AUKNEW4JLPXQ)
-
-
 ## Features
-- Swift 3.0 compatible (Xcode 8.0).
+- Swift 3.0 compatible (Xcode 7.3).
+- Fully rewritten from the version 1.0.
 - Protocols based design.
 - For **beginners** and **advanced** users
 - Fully customizable. Build your own stack!
@@ -48,22 +45,6 @@ pod "SugarRecord/CoreData"
 pod "SugarRecord/CoreData+iCloud"
 pod "SugarRecord/Realm"
 ```
-
-### [Carthage](https://github.com/carthage)
-
-1. Install [Carthage](https://github.com/carthage). You can do it with `brew install carthage`.
-2. Edit your `Cartfile` file and add the following line `github "carambalabs/sugarrecord".
-3. Execute `carthage update`
-4. Add the frameworks to your project as explained on the [Carthage repository](https://github.com/carthage).
-
-> Note: If you use the [Realm](https://realm.io) you have to also add `Realm.framework` and `RealmSwift.framework`.
-
-### Reactive programming
-
-We provide extensions for SugarRecord that offer a reactive interface to the library:
-
-- [RxSugarRecord](https://github.com/carambalabs/rxsugarrecord)
-- [RACSugarRecord](https://github.com/carambalabs/racsugarrecord)
 
 #### Notes
 - SugarRecord 3.0 is not compatible with the 1.x interface. If you were using that version you'll have to update your project to support this version.
